@@ -7,7 +7,10 @@ renderer.setSize( 500, 500 );
 document.body.appendChild( renderer.domElement );
 
 var geometry = new THREE.BoxGeometry( 10, 10,10 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+var texture = new THREE.TextureLoader().load( 'img/test2.png' );
+texture.anisotropy = 0
+var material = new THREE.MeshBasicMaterial( { map: texture } );
+// var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
 
@@ -24,7 +27,7 @@ var t2 = new TWEEN.Tween(cube.position);
 var t3 = new TWEEN.Tween(cube.position);
 var t4 = new TWEEN.Tween(cube.position);
 t1.onUpdate(function(object) {
-	console.log(object.x);
+	// console.log(object.x);
 });
 t1.to({ x: -200 ,y: -200 }, 1000);
 t2.to({ x: -200 ,y: 200 }, 1000);
@@ -45,10 +48,10 @@ t1.chain(t2,t5,t7)
 t2.chain(t3,t6,t8)
 t3.chain(t4)
 
-var m1 = new TWEEN.Tween(material);
-var m2 = new TWEEN.Tween(material);
-m1.to({ color:{r:1}} , 1000);
-m2.to({ color:{r:0}}, 1000);
+// var m1 = new TWEEN.Tween(material);
+// var m2 = new TWEEN.Tween(material);
+// m1.to({ color:{r:1}} , 1000);
+// m2.to({ color:{r:0}}, 1000);
 
 // rdy
 $( document ).ready(function() {
@@ -60,8 +63,7 @@ $( document ).ready(function() {
     var tweens = TWEEN.getAll()
     tweens.forEach(function(t) {
       t.stop()
-    });
-    // t1.stop()
+    });    
   })
 });
 // load
