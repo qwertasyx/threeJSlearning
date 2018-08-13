@@ -2,15 +2,14 @@ var scene = new THREE.Scene();
 // var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 var camera = new THREE.OrthographicCamera( -250,250, -250, 250, 1, 1000 );
 
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
 renderer.setSize( 500, 500 );
 document.body.appendChild( renderer.domElement );
 
-var geometry = new THREE.BoxGeometry( 10, 10,10 );
-var texture = new THREE.TextureLoader().load( 'img/test2.png' );
-texture.anisotropy = 0
-var material = new THREE.MeshBasicMaterial( { map: texture } );
-// var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+var geometry = new THREE.BoxGeometry( 100, 100, 100 );
+// var texture = new THREE.TextureLoader().load( 'img/test2.png' );
+// var material = new THREE.MeshBasicMaterial( { map: texture } );
+var material = new THREE.MeshBasicMaterial( { color: 0x00ee00 } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
 
@@ -89,17 +88,27 @@ $( window ).on( "load", function() {
     r.add(cube.rotation, 'y', -10, 10)
     r.add(cube.rotation, 'z', -10, 10)
     r.open()
+  var c = gui.addFolder('color');
+    c.add(cube.material.color, 'r', 0, 1)
+    c.add(cube.material.color, 'g', 0, 1)
+    c.add(cube.material.color, 'b', 0, 1)
+    c.open()
 
   $('#test').on('click',function(e){
     gui.toggleHide()
   })
 });
 
+var gl = renderer.getContext()
+var pixels = new Uint8Array(1 * 1 * 4);
+
 function animate() {
   stats.begin();
   requestAnimationFrame( animate );
   TWEEN.update();
   renderer.render( scene, camera );
+  // gl.readPixels(480,480, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  // console.log(pixels)
   stats.end();
 }
 animate();
