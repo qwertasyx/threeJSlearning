@@ -458,11 +458,24 @@ TWEEN.Easing = {
 	Linear: {
 
 		None: function (k) {
-
 			return k;
-
 		}
 
+	},
+
+	Step: {
+
+		Out: function (k) {
+			if (k>=1) {
+				return 1;
+			} else {
+				return 0;
+			}	
+		},
+
+		In: function (k) {
+			return 1;
+		}
 	},
 
 	Quadratic: {
