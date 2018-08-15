@@ -1,7 +1,8 @@
 var scene = new THREE.Scene();
-// var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+// var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
 var camera = new THREE.OrthographicCamera( -250,250, -250, 250, 1, 1000 );
 
+// var controls = new THREE.TrackballControls( camera );
 var renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true});
 renderer.setSize( 500, 500 );
 document.body.appendChild( renderer.domElement );
@@ -23,10 +24,14 @@ var blue = new THREE.Mesh( geometry, material3 );
 scene.add( cube );
 scene.add( red );
 scene.add( blue );
+// var objects = []
+// objects.push(red)
+// objects.push(cube)
+// objects.push(blue)
+camera.position.z = 0;
 
-camera.position.z = 5;
-cube.vx = 0
-//
+// var controls = new THREE.DragControls( objects, camera, renderer.domElement );
+
 var sequence = []
 // sequence.push(
 //   { type:     'init',
@@ -148,9 +153,6 @@ var gui
 $( window ).on( "load", function() {
   /// DAT GUI
   gui = new dat.GUI();
-  var f3 = gui.addFolder('Speed');
-    f3.add(cube, 'vx', 0, 20);
-  f3.open();
   var f1 = gui.addFolder('Position');
     f1.add(cube.position, 'x', -250, 250);
     f1.add(cube.position, 'y', -250, 250).listen();
@@ -183,6 +185,8 @@ function animate() {
   stats.begin();
   requestAnimationFrame( animate );
   TWEEN.update();
+  renderer.clear();
+  // controls.update();
   renderer.render( scene, camera );
   // gl.readPixels(250,10, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
   // console.log(pixels)
@@ -223,11 +227,13 @@ function buildTweenSequernce(obj,sequence,endless){
     // positiontween is the basetween for the next
     lastTween = positionTween;    
   });
-  
+  lastTween.onComplete(function(e){
+    console.log('... done:' ,e)
+    t1.start();
+  });
   if(endless){
     lastTween.chain(baseTween)
   }
-
   return baseTween
 }
 
