@@ -20,7 +20,7 @@ for (i = 0; i < 1500; i++) {
 }
 //gui
 var dots = {visible:true};
-var lsScale = {x:1,y:1};
+var lsScale = {x:1,y:1,z:1};
 
 var pixelpicker = {x:0,y:0,c:{r:0,g:0,b:0}}
 
@@ -191,8 +191,9 @@ $( window ).on( "load", function() {
     var f3d = f3.add(dots, 'visible');
   f3.open();
   var f4 = gui.addFolder('Lightsources');
-    var f4sx = f4.add(lsScale, 'x',0, 50);
-    var f4sy = f4.add(lsScale, 'y',0, 50);
+    var f4sx = f4.add(lsScale, 'x',0, 20);
+    var f4sy = f4.add(lsScale, 'y',0, 20);
+    var f4sz = f4.add(lsScale, 'z',0, 20);
   f4.open();
 
   f3d.onChange(function(value) {
@@ -208,6 +209,11 @@ $( window ).on( "load", function() {
   f4sy.onChange(function(value) {
     pixels.forEach(function(pixel,index,arr){
       pixel.real.scale.y = value;
+    });
+  });
+  f4sz.onChange(function(value) {
+    pixels.forEach(function(pixel,index,arr){
+      pixel.real.scale.z = value;
     });
   });
 });
