@@ -1,7 +1,7 @@
 ///////////////////////
 /// THREE.js Vars   ///
 ///////////////////////
-var cameraVisu, cameraOrth, sceneReal, sceneAni, renderer1, renderer2, r2context, controls1;
+var cameraVisu, cameraOrth, sceneReal, sceneAni, renderer1, renderer2, r2context, controls;
 var cube,cube2,gridHelper;
 var pixelMesh;
 //tweens
@@ -41,12 +41,11 @@ var pixelpicker = {x:0,y:0,c:{r:0,g:0,b:0}}
 ///   on LOAD    ///
 ////////////////////
 $( window ).on( "load", function() {
-  ///
   cameraVisu.position.set(sizeRenderCanvas.w/2,sizeRenderCanvas.h/2,100);
-  controls1.target.x = sizeRenderCanvas.w/2
-  controls1.target.y = sizeRenderCanvas.h/2
-  controls1.target.z = 0
-  controls1.update()
+  controls.target.x = sizeRenderCanvas.w/2
+  controls.target.y = sizeRenderCanvas.h/2
+  controls.target.z = 0
+  controls.update()
   
   /////////////////////
   ///  dat.GUI     ///
@@ -136,30 +135,14 @@ $( window ).on( "load", function() {
   });
   f6c.onChange(function(value) {
     var canvas = document.getElementById("renderCanvas1")
-    if (cameraVisu instanceof THREE.PerspectiveCamera) {
-      
+    if (cameraVisu instanceof THREE.PerspectiveCamera) {      
       cameraVisu = new THREE.OrthographicCamera(-canvas.width/8, canvas.width/8,-canvas.height/8, canvas.height/8 , -200, 500 );
-      controls1  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));
-      // controls1.enableRotate = false
-      cameraVisu.position.set(sizeRenderCanvas.w/2,-sizeRenderCanvas.h/2,100);
-      controls1.target.x = sizeRenderCanvas.w/2
-      controls1.target.y = -sizeRenderCanvas.h/2
-      controls1.target.z = 0
-      controls1.update()
-      sceneReal.rotation.x = Math.PI
-      
+      initCameraOrth();      
       this.perspective = "Orthographic";
     } else {
       sceneReal.rotation.x = 0
       cameraVisu = new THREE.PerspectiveCamera( 75, canvas.width/canvas.height , 0.1, 1000 );
-      controls1  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));
-      
-      cameraVisu.position.set(sizeRenderCanvas.w/2,sizeRenderCanvas.h/2,100);
-      controls1.target.x = sizeRenderCanvas.w/2
-      controls1.target.y = sizeRenderCanvas.h/2
-      controls1.target.z = 0
-      controls1.update()
-      sceneReal.rotation.x = 0
+      initCameraPersp();
 
       this.perspective = "Perspective";
     }
@@ -176,10 +159,7 @@ function init() {
   sceneReal.background = new THREE.Color( 0x1f1f1f );
   sceneAni = new THREE.Scene();
 	sceneAni.background = new THREE.Color( 0x000000 );
-  //cameras
-	cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
-  cameraVisu.position.set(50,50,100);
-  sceneReal.add(cameraVisu);
+  
 
   cameraOrth = new THREE.OrthographicCamera( 0, sizeRenderCanvas.w, 0, sizeRenderCanvas.h, 0.1, 1000 );
   cameraOrth.position.z = 5;
@@ -206,15 +186,18 @@ function init() {
   // gridHelper.position.z= -0.5
   // sceneAni.add(  gridHelper );
  
-	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:true });
+	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:false });
   renderer1.setSize( window.innerWidth, 500 );
   renderer2 = new THREE.WebGLRenderer({ canvas: renderCanvas2, preserveDrawingBuffer: true });
   renderer2.setSize( sizeRenderCanvas.w, sizeRenderCanvas.h );
   r2context = renderer2.getContext()
   
-  // controls  
-  controls1 = new THREE.OrbitControls( cameraVisu, renderer1.domElement);
-
+  // controls + camera
+  var canvas = document.getElementById("renderCanvas1")
+  cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
+  initCameraPersp();
+  // cameraVisu = new THREE.OrthographicCamera(-canvas.width/8, canvas.width/8,-canvas.height/8, canvas.height/8 , -200, 500 );
+  // initCameraOrth();
 
   //draw lightsources and pixel edges
   lightSourcesMesh = new THREE.BoxGeometry( 5, 5, 1 );
@@ -305,6 +288,26 @@ function setRealWorldPixels(){
   });  
 }
 
+/// camerastuff ///
+function initCameraPersp(){    
+  controls  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));      
+  cameraVisu.position.set(sizeRenderCanvas.w/2,sizeRenderCanvas.h/2,100);
+  controls.target.x = sizeRenderCanvas.w/2
+  controls.target.y = sizeRenderCanvas.h/2
+  controls.target.z = 0
+  controls.update()
+  sceneReal.rotation.x = 0
+}
+function initCameraOrth(){  
+  controls  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));
+  // controls.enableRotate = false
+  cameraVisu.position.set(sizeRenderCanvas.w/2,-sizeRenderCanvas.h/2,100);
+  controls.target.x = sizeRenderCanvas.w/2
+  controls.target.y = -sizeRenderCanvas.h/2
+  controls.target.z = 0
+  controls.update()
+  sceneReal.rotation.x = Math.PI
+}
 ////////////////////
 ///   init       ///
 ////////////////////
