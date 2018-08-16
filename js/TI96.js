@@ -1,176 +1,45 @@
+///////////////////////
+/// THREE.js Vars   ///
+///////////////////////
 var cameraVisu, cameraOrth, sceneReal, sceneAni, renderer1, renderer2, r2context, controls1;
 var cube,cube2,gridHelper;
 var pixelMesh;
 //tweens
 var t1,t2,t3,t4,t1r,t2r
-//stats
+///////////////////////
+/// stats           ///
+///////////////////////
 var stats = new Stats();
 stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
 
-// pixels TI96 12x8
+///////////////////////
+/// HardwareSpecific///
+///////////////////////
 var sizeRenderCanvas = {w:130,h:90}
 var pixels =[]
 var i,j;
-// for (i = 1; i < 13; i++) { 
-//   for (j = 1; j < 9; j++) { 
-//     pixels.push({x:i*10,y:j*10,z:0,real:null, ani:null})    
-//   }  
-// }
 for (i = 8; i > 0; i--) { 
   for (j = 1; j < 13; j++) { 
     pixels.push({x:j*10,y:i*10,z:0,real:null, ani:null})    
   }  
 }
-// TI specific
+var pixelValues = new Uint8Array(sizeRenderCanvas.w * sizeRenderCanvas.h * 4);
+
 var bytearray = new Uint8Array(97);
 bytearray[0] = 96; // amount of mapped LED´s
-//gui
+
+
+//////////////////////////////
+/// Puplic Var for dat.GUI ///
+/////////////////////////////
 var dots = {visible:true};
 var lsScale = {x:1,y:1,z:1};
 var device = {connection:false,socket:null}
 var pixelpicker = {x:0,y:0,c:{r:0,g:0,b:0}}
-
-var pixelValues = new Uint8Array(sizeRenderCanvas.w * sizeRenderCanvas.h * 4);
-
-
-// do stuff
-init();
-animate();
- 
-function init() {
-	sceneReal = new THREE.Scene();
-  sceneReal.background = new THREE.Color( 0x1f1f1f );
-  sceneAni = new THREE.Scene();
-	sceneAni.background = new THREE.Color( 0x000000 );
-  //cameras
-	cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
-  cameraVisu.position.set(50,50,100);
-  // cameraVisu.lookAt(new THREE.Vector3(50,50,0));
-  sceneReal.add(cameraVisu);
-
-  cameraOrth = new THREE.OrthographicCamera( 0, sizeRenderCanvas.w, 0, sizeRenderCanvas.h, 0.1, 1000 );
-  cameraOrth.position.z = 5;
-  cameraOrth.zoom = 1
-  cameraOrth.updateProjectionMatrix()
-  //objects
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-  cube = new THREE.Mesh( geometry, material );
-  cube.vrz = 0.005;
-  sceneReal.add( cube );
-  var geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
-	var material2 = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-  cube2 = new THREE.Mesh( geometry2, material2 );
-  cube2.position.z = 1
-  sceneAni.add( cube2 );
-
-  // axes
-  sceneReal.add( new THREE.AxesHelper( 100 ) );
-  // grid
-
-  gridHelper = new THREE.GridHelper( 1000, 100,'#110000','#111111' );  
-  gridHelper.rotation.x=Math.PI / 2
-  // gridHelper.position.z= -0.5
-  // sceneAni.add(  gridHelper );
- 
-	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:true });
-  renderer1.setSize( window.innerWidth, 500 );
-  renderer2 = new THREE.WebGLRenderer({ canvas: renderCanvas2, preserveDrawingBuffer: true });
-  renderer2.setSize( sizeRenderCanvas.w, sizeRenderCanvas.h );
-  r2context = renderer2.getContext()
-  
-  // controls  
-  // cameraVisu.position.set(0,0,100);
-  // cameraVisu.lookAt(new THREE.Vector3(50,50,0));
-  // controls1.update();
-  controls1 = new THREE.OrbitControls( cameraVisu, renderer1.domElement);
-  pixelMesh = new THREE.BoxGeometry( 5, 5, 1 );
-  //draw lightsources and pixel edges
-  pixels.forEach(function(i,index,arr){ 
-    var geometry = new THREE.BoxBufferGeometry( 3, 3, 3 );
-    var edges = new THREE.EdgesGeometry( geometry );
-    var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-    // line.position.x = i.x;
-    // line.position.y = 200 - i.y;
-    // line.position.z = i.z;
-    var dotGeometry = new THREE.Geometry();
-    dotGeometry.vertices.push(new THREE.Vector3( 0, 0, 0));
-    var dotMaterial = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
-    var dot =    new THREE.Points(dotGeometry, dotMaterial );
-    dot.position.x = i.x;
-    dot.position.y = i.y;
-    dot.position.z = i.z;
-    sceneAni.add( dot );
-    i.ani = dot;
-    // draw real lightsources
-    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-    var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-    var ls = new THREE.Mesh( pixelMesh, material );
-    ls.position.x = i.x;
-    ls.position.y = i.y;
-    ls.position.z = i.z;
-    sceneReal.add( ls );
-    i.real = ls;
-  });
-  // example tween
-  cube2.scale.x =30
-  cube2.scale.y =30
-  cube2.position.z =4
-  t1 = new TWEEN.Tween(cube2.position);
-  t2 = new TWEEN.Tween(cube2.position);
-  t3 = new TWEEN.Tween(cube2.position);
-  t4 = new TWEEN.Tween(cube2.position);
-  t1r = new TWEEN.Tween(cube2.rotation);
-  t2r = new TWEEN.Tween(cube2.rotation);
-  t1.to({ x: 0 ,y: 0 }, 1000);
-  t2.to({ x: 140 ,y: 100 }, 1000);
-  t3.to({ x: 140 ,y: 0 }, 1000);
-  t4.to({ x: -20 ,y: 50 }, 1000);
-  t1r.to({ z: Math.PI  }, 1000);
-  t2r.to({ z: 0  }, 1000);
-
-  t1.chain(t2,t1r)
-  t2.chain(t3)
-  t3.chain(t4,t2r)
-  t4.chain(t1)
-  // t1.start();
-}
- 
-function animate() {
-  
-  requestAnimationFrame( animate );
-  TWEEN.update();
-  // renderer1.clear();
-  // renderer2.clear();
-
-  cube.rotation.z += cube.vrz;
-  
-  renderer1.render( sceneReal, cameraVisu );
-  stats.begin();
-  renderer2.render( sceneAni, cameraOrth );
-    
-  collectPixelvalues()
-  setRealWorldPixels()
-  //send udp
-  if(device.socket!=null){
-    device.socket.send(bytearray)
-  }  
-  stats.end();
-}
-function collectPixelvalues(){
-  r2context.readPixels(0,0, sizeRenderCanvas.w, sizeRenderCanvas.h, r2context.RGBA, r2context.UNSIGNED_BYTE, pixelValues);
-}
-function setRealWorldPixels(){  
-  pixels.forEach(function(pixel,index,arr){
-    pixel.real.material.color.r = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +0 ] / 255
-    pixel.real.material.color.g = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +1 ] / 255
-    pixel.real.material.color.b = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +2 ] / 255
-    bytearray[index+1] = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +0 ]
-    //0 = Amount of LED´s , 1== channel1
-  });  
-}
-
+/////////////////////
+///   on LOAD    ///
+////////////////////
 $( window ).on( "load", function() {
   ///
   cameraVisu.position.set(sizeRenderCanvas.w/2,sizeRenderCanvas.h/2,100);
@@ -179,7 +48,9 @@ $( window ).on( "load", function() {
   controls1.target.z = 0
   controls1.update()
   
-  /// DAT GUI
+  /////////////////////
+  ///  dat.GUI     ///
+  ////////////////////
   gui = new dat.GUI(  );
   gui.domElement.id = 'gui';
   var f1 = gui.addFolder('Cube');
@@ -235,6 +106,7 @@ $( window ).on( "load", function() {
       pixel.real.scale.z = value;
     });
   });
+  
   f5c.onChange(function(value) {
     if( value ){
       device.socket = new WebSocket("ws://127.0.0.1:9000");
@@ -293,3 +165,149 @@ $( window ).on( "load", function() {
     }
   });
 });
+
+
+////////////////////
+///   functions  ///
+////////////////////
+ 
+function init() {
+	sceneReal = new THREE.Scene();
+  sceneReal.background = new THREE.Color( 0x1f1f1f );
+  sceneAni = new THREE.Scene();
+	sceneAni.background = new THREE.Color( 0x000000 );
+  //cameras
+	cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
+  cameraVisu.position.set(50,50,100);
+  sceneReal.add(cameraVisu);
+
+  cameraOrth = new THREE.OrthographicCamera( 0, sizeRenderCanvas.w, 0, sizeRenderCanvas.h, 0.1, 1000 );
+  cameraOrth.position.z = 5;
+  cameraOrth.zoom = 1
+  cameraOrth.updateProjectionMatrix()
+  //objects
+	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+  cube = new THREE.Mesh( geometry, material );
+  cube.vrz = 0.005;
+  sceneReal.add( cube );
+  var geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
+	var material2 = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+  cube2 = new THREE.Mesh( geometry2, material2 );
+  cube2.position.z = 1
+  sceneAni.add( cube2 );
+
+  // axes
+  sceneReal.add( new THREE.AxesHelper( 100 ) );
+  // grid
+
+  gridHelper = new THREE.GridHelper( 1000, 100,'#110000','#111111' );  
+  gridHelper.rotation.x=Math.PI / 2
+  // gridHelper.position.z= -0.5
+  // sceneAni.add(  gridHelper );
+ 
+	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:true });
+  renderer1.setSize( window.innerWidth, 500 );
+  renderer2 = new THREE.WebGLRenderer({ canvas: renderCanvas2, preserveDrawingBuffer: true });
+  renderer2.setSize( sizeRenderCanvas.w, sizeRenderCanvas.h );
+  r2context = renderer2.getContext()
+  
+  // controls  
+  controls1 = new THREE.OrbitControls( cameraVisu, renderer1.domElement);
+
+
+  //draw lightsources and pixel edges
+  lightSourcesMesh = new THREE.BoxGeometry( 5, 5, 1 );
+  pixels.forEach(function(i,index,arr){ 
+    var geometry = new THREE.BoxBufferGeometry( 3, 3, 3 );
+    var edges = new THREE.EdgesGeometry( geometry );
+    var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+    // line.position.x = i.x;
+    // line.position.y = 200 - i.y;
+    // line.position.z = i.z;
+    var dotGeometry = new THREE.Geometry();
+    dotGeometry.vertices.push(new THREE.Vector3( 0, 0, 0));
+    var dotMaterial = new THREE.PointsMaterial( { size: 1, sizeAttenuation: false } );
+    var dot =    new THREE.Points(dotGeometry, dotMaterial );
+    dot.position.x = i.x;
+    dot.position.y = i.y;
+    dot.position.z = i.z;
+    sceneAni.add( dot );
+    i.ani = dot;
+    // draw real lightsources
+    // var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+    var ls = new THREE.Mesh( lightSourcesMesh, material );
+    ls.position.x = i.x;
+    ls.position.y = i.y;
+    ls.position.z = i.z;
+    sceneReal.add( ls );
+    i.real = ls;
+  });
+  // example tweens
+  cube2.scale.x =30
+  cube2.scale.y =30
+  cube2.position.z =4
+  t1 = new TWEEN.Tween(cube2.position);
+  t2 = new TWEEN.Tween(cube2.position);
+  t3 = new TWEEN.Tween(cube2.position);
+  t4 = new TWEEN.Tween(cube2.position);
+  t1r = new TWEEN.Tween(cube2.rotation);
+  t2r = new TWEEN.Tween(cube2.rotation);
+  t1.to({ x: 0 ,y: 0 }, 1000);
+  t2.to({ x: 140 ,y: 100 }, 1000);
+  t3.to({ x: 140 ,y: 0 }, 1000);
+  t4.to({ x: -20 ,y: 50 }, 1000);
+  t1r.to({ z: Math.PI  }, 1000);
+  t2r.to({ z: 0  }, 1000);
+
+  t1.chain(t2,t1r)
+  t2.chain(t3)
+  t3.chain(t4,t2r)
+  t4.chain(t1)
+  // t1.start();
+}
+ 
+function animate() {
+  
+  requestAnimationFrame( animate );
+  TWEEN.update();
+  // renderer1.clear();
+  // renderer2.clear();
+
+  cube.rotation.z += cube.vrz;
+  
+  renderer1.render( sceneReal, cameraVisu );
+  stats.begin();
+  renderer2.render( sceneAni, cameraOrth );
+    
+  collectPixelvalues()
+  setRealWorldPixels()
+  //send udp
+  if(device.socket!=null){
+    device.socket.send(bytearray)
+  }  
+  stats.end();
+}
+
+///  PixelStuff   ///
+
+function collectPixelvalues(){
+  r2context.readPixels(0,0, sizeRenderCanvas.w, sizeRenderCanvas.h, r2context.RGBA, r2context.UNSIGNED_BYTE, pixelValues);
+}
+function setRealWorldPixels(){  
+  pixels.forEach(function(pixel,index,arr){
+    pixel.real.material.color.r = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +0 ] / 255
+    pixel.real.material.color.g = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +1 ] / 255
+    pixel.real.material.color.b = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +2 ] / 255
+    bytearray[index+1] = pixelValues[( pixel.y*sizeRenderCanvas.w* 4 ) + ( pixel.x*4) +0 ]
+    //0 = Amount of LED´s , 1== channel1
+  });  
+}
+
+////////////////////
+///   init       ///
+////////////////////
+
+init();
+animate();
