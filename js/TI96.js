@@ -2,8 +2,8 @@
 /// THREE.js Vars   ///
 ///////////////////////
 var cameraVisu, cameraOrth, sceneReal, sceneAni, renderer1, renderer2, r2context, controls;
-var cube,cube2,gridHelper;
-var pixelMesh;
+var cube,cube2,gridHelper, bgmesh;
+var pixelMesh, axes;
 //tweens
 var t1,t2,t3,t4,t1r,t2r
 ///////////////////////
@@ -28,7 +28,6 @@ var pixelValues = new Uint8Array(sizeRenderCanvas.w * sizeRenderCanvas.h * 4);
 
 var bytearray = new Uint8Array(97);
 bytearray[0] = 96; // amount of mapped LED´s
-
 
 //////////////////////////////
 /// Puplic Var for dat.GUI ///
@@ -84,6 +83,9 @@ $( window ).on( "load", function() {
   var f6 = gui.addFolder('Camera');
     var f6c = f6.add(cameraVisu, 'type',[ 'PerspectiveCamera', 'OrthographicCamera']);
   f6.open();
+  var f7 = gui.addFolder('Helper');
+    f7.add(axes, 'visible');
+
 
   f3d.onChange(function(value) {
     pixels.forEach(function(pixel,index,arr){
@@ -104,8 +106,7 @@ $( window ).on( "load", function() {
     pixels.forEach(function(pixel,index,arr){
       pixel.real.scale.z = value;
     });
-  });
-  
+  });  
   f5c.onChange(function(value) {
     if( value ){
       device.socket = new WebSocket("ws://127.0.0.1:9000");
@@ -136,7 +137,7 @@ $( window ).on( "load", function() {
   f6c.onChange(function(value) {
     var canvas = document.getElementById("renderCanvas1")
     if (cameraVisu instanceof THREE.PerspectiveCamera) {      
-      cameraVisu = new THREE.OrthographicCamera(-canvas.width/8, canvas.width/8,-canvas.height/8, canvas.height/8 , -200, 500 );
+      cameraVisu = new THREE.OrthographicCamera(-canvas.width/8, canvas.width/8,canvas.height/8, -canvas.height/8 , -1000, 1000 );
       initCameraOrth();      
       this.perspective = "Orthographic";
     } else {
@@ -148,7 +149,6 @@ $( window ).on( "load", function() {
     }
   });
 });
-
 
 ////////////////////
 ///   functions  ///
@@ -172,13 +172,17 @@ function init() {
   cube.vrz = 0.005;
   sceneReal.add( cube );
   var geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
-	var material2 = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+  // var material2 = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+  var texture = new THREE.Texture( generateTexture() );
+	texture.needsUpdate = true; // important!
+  var material2 = new THREE.MeshBasicMaterial( { map: texture} );
   cube2 = new THREE.Mesh( geometry2, material2 );
   cube2.position.z = 1
   sceneAni.add( cube2 );
 
   // axes
-  sceneReal.add( new THREE.AxesHelper( 100 ) );
+  axes = new THREE.AxesHelper( 100 )
+  sceneReal.add( axes );
   // grid
 
   gridHelper = new THREE.GridHelper( 1000, 100,'#110000','#111111' );  
@@ -186,7 +190,7 @@ function init() {
   // gridHelper.position.z= -0.5
   // sceneAni.add(  gridHelper );
  
-	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:false });
+	renderer1 = new THREE.WebGLRenderer({ canvas: renderCanvas1, antialias:true });
   renderer1.setSize( window.innerWidth, 500 );
   renderer2 = new THREE.WebGLRenderer({ canvas: renderCanvas2, preserveDrawingBuffer: true });
   renderer2.setSize( sizeRenderCanvas.w, sizeRenderCanvas.h );
@@ -227,6 +231,17 @@ function init() {
     sceneReal.add( ls );
     i.real = ls;
   });
+  // draw  backgound
+  var vertices = []
+  vertices.push(new THREE.Vector3( 0, 0, 0));
+  vertices.push(new THREE.Vector3( 0, 90, 0));
+  vertices.push(new THREE.Vector3( 130, 90, 0));
+  vertices.push(new THREE.Vector3( 130, 0, 0));
+  var bggeometry = new THREE.ConvexBufferGeometry( vertices );
+  var bgmaterial = new THREE.MeshBasicMaterial( {color: 0x001000} );
+  bgmesh = new THREE.Mesh( bggeometry, bgmaterial );
+  sceneReal.add( bgmesh );
+
   // example tweens
   cube2.scale.x =30
   cube2.scale.y =30
@@ -249,10 +264,9 @@ function init() {
   t3.chain(t4,t2r)
   t4.chain(t1)
   // t1.start();
-}
- 
+} 
 function animate() {
-  
+  stats.begin();
   requestAnimationFrame( animate );
   TWEEN.update();
   // renderer1.clear();
@@ -261,7 +275,7 @@ function animate() {
   cube.rotation.z += cube.vrz;
   
   renderer1.render( sceneReal, cameraVisu );
-  stats.begin();
+  
   renderer2.render( sceneAni, cameraOrth );
     
   collectPixelvalues()
@@ -272,9 +286,7 @@ function animate() {
   }  
   stats.end();
 }
-
 ///  PixelStuff   ///
-
 function collectPixelvalues(){
   r2context.readPixels(0,0, sizeRenderCanvas.w, sizeRenderCanvas.h, r2context.RGBA, r2context.UNSIGNED_BYTE, pixelValues);
 }
@@ -287,7 +299,24 @@ function setRealWorldPixels(){
     //0 = Amount of LED´s , 1== channel1
   });  
 }
-
+function generateTexture() {
+	var size = 20;
+	// create canvas
+	canvas = document.createElement( 'canvas' );
+	canvas.width = size;
+	canvas.height = size;
+	// get context
+	var context = canvas.getContext( '2d' );
+	// draw gradient
+	context.rect( 0, 0, size, size );
+	var gradient = context.createLinearGradient( 0, 0, size, size );
+	gradient.addColorStop(0,   '#000000'); 
+  gradient.addColorStop(0.5, '#ffffff'); 
+  gradient.addColorStop(1,   '#000000'); 
+	context.fillStyle = gradient;
+	context.fill();
+	return canvas;
+}
 /// camerastuff ///
 function initCameraPersp(){    
   controls  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));      
@@ -296,17 +325,15 @@ function initCameraPersp(){
   controls.target.y = sizeRenderCanvas.h/2
   controls.target.z = 0
   controls.update()
-  sceneReal.rotation.x = 0
 }
 function initCameraOrth(){  
   controls  = new THREE.OrbitControls( cameraVisu, document.getElementById("renderCanvas1"));
   // controls.enableRotate = false
-  cameraVisu.position.set(sizeRenderCanvas.w/2,-sizeRenderCanvas.h/2,100);
+   cameraVisu.position.set(sizeRenderCanvas.w/2,sizeRenderCanvas.h/2,100);
   controls.target.x = sizeRenderCanvas.w/2
-  controls.target.y = -sizeRenderCanvas.h/2
+  controls.target.y = sizeRenderCanvas.h/2
   controls.target.z = 0
   controls.update()
-  sceneReal.rotation.x = Math.PI
 }
 ////////////////////
 ///   init       ///
