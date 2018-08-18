@@ -145,9 +145,6 @@ function init() {
   var canvas = document.getElementById("renderCanvas1")
   cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
   initCameraPersp();
-  // cameraVisu = new THREE.OrthographicCamera(-canvas.width/8, canvas.width/8,-canvas.height/8, canvas.height/8 , -200, 500 );
-  // initCameraOrth();
-
  
   t1 = new TWEEN.Tween(cube.position);
   // t1 = new TWEEN.Tween(cube2.position);
