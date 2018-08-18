@@ -88,8 +88,6 @@ $( window ).on( "load", function() {
 
   fpos.onChange(function(value) {  
     var x = TWEEN['Easing'][this.object.func][this.object.dir](value)
-    // var x = window["TWEEN"]["Easing"][this.object.func][this.object.dir](value);
-    // var x = TWEEN.Easing.Bounce.InOut(value);
     cube.position.x = this.object.startVal + ((this.object.endVal - this.object.startVal)*x);
 
   });
@@ -135,8 +133,6 @@ function init() {
 
   gridHelper = new THREE.GridHelper( 1000, 100,'#110000','#111111' );  
   gridHelper.rotation.x=Math.PI / 2
-  // gridHelper.position.z= -0.5
-  // sceneAni.add(  gridHelper );
  
 	renderer = new THREE.WebGLRenderer({ canvas: renderCanvas1 , antialias:true });
   renderer.setSize( window.innerWidth, 500 );
