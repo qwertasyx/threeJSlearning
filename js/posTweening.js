@@ -88,8 +88,6 @@ $( window ).on( "load", function() {
 
   fpos.onChange(function(value) {  
     var x = TWEEN['Easing'][this.object.func][this.object.dir](value)
-    // var x = window["TWEEN"]["Easing"][this.object.func][this.object.dir](value);
-    // var x = TWEEN.Easing.Bounce.InOut(value);
     cube.position.x = this.object.startVal + ((this.object.endVal - this.object.startVal)*x);
 
   });
