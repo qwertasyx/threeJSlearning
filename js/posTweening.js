@@ -135,8 +135,6 @@ function init() {
 
   gridHelper = new THREE.GridHelper( 1000, 100,'#110000','#111111' );  
   gridHelper.rotation.x=Math.PI / 2
-  // gridHelper.position.z= -0.5
-  // sceneAni.add(  gridHelper );
  
 	renderer = new THREE.WebGLRenderer({ canvas: renderCanvas1 , antialias:true });
   renderer.setSize( window.innerWidth, 500 );
