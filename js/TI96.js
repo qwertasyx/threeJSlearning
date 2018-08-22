@@ -3,7 +3,9 @@
 ///////////////////////
 var cameraVisu, cameraOrth, sceneReal, sceneAni, renderer1, renderer2, r2context, controls;
 var cube,cube2,gridHelper, bgmesh;
+var AOmaterial, AOtexture, texture1, texture2, videoTexture
 var pixelMesh, axes;
+var textures = []
 //tweens
 var t1,t2,t3,t4,t1r,t2r
 ///////////////////////
@@ -155,8 +157,14 @@ $( window ).on( "load", function() {
 ////////////////////
  
 function init() {
+  // laoding textures
+  const loader = new THREE.TextureLoader();
+
+  texture1 = loader.load( 'img/rnd.png' );
+  texture2 = loader.load( 'img/cross.png' );
+
 	sceneReal = new THREE.Scene();
-  sceneReal.background = new THREE.Color( 0x1f1f1f );
+  sceneReal.background = new THREE.Color( 0x000000 );
   sceneAni = new THREE.Scene();
 	sceneAni.background = new THREE.Color( 0x000000 );
   
@@ -172,11 +180,11 @@ function init() {
   cube.vrz = 0.005;
   sceneReal.add( cube );
   var geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
-  // var material2 = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+  var AOmaterial = new THREE.MeshBasicMaterial( { color: 0x00f00f } );
   var texture = new THREE.Texture( generateTexture() );
 	texture.needsUpdate = true; // important!
-  var material2 = new THREE.MeshBasicMaterial( { map: texture} );
-  cube2 = new THREE.Mesh( geometry2, material2 );
+  var AOtexture = new THREE.MeshBasicMaterial( { map: texture} );
+  cube2 = new THREE.Mesh( geometry2, AOtexture );
   cube2.position.z = 1
   sceneAni.add( cube2 );
 
@@ -237,7 +245,7 @@ function init() {
   vertices.push(new THREE.Vector3( 0, 90, 0));
   vertices.push(new THREE.Vector3( 130, 90, 0));
   vertices.push(new THREE.Vector3( 130, 0, 0));
-  var bggeometry = new THREE.ConvexBufferGeometry( vertices );
+  var bggeometry = new THREE.ConvexBufferGeometry( vertices );sx
   var bgmaterial = new THREE.MeshBasicMaterial( {color: 0x001000} );
   bgmesh = new THREE.Mesh( bggeometry, bgmaterial );
   sceneReal.add( bgmesh );
@@ -245,17 +253,17 @@ function init() {
   // example tweens
   cube2.scale.x =30
   cube2.scale.y =30
-  cube2.position.z =4
+  cube2.position.z = 4
   t1 = new TWEEN.Tween(cube2.position);
   t2 = new TWEEN.Tween(cube2.position);
   t3 = new TWEEN.Tween(cube2.position);
   t4 = new TWEEN.Tween(cube2.position);
   t1r = new TWEEN.Tween(cube2.rotation);
   t2r = new TWEEN.Tween(cube2.rotation);
-  t1.to({ x: 0 ,y: 0 }, 1000);
-  t2.to({ x: 140 ,y: 100 }, 1000);
-  t3.to({ x: 140 ,y: 0 }, 1000);
-  t4.to({ x: -20 ,y: 50 }, 1000);
+  t1.to({ x: -20 ,y: 45 }, 1000);
+  t2.to({ x: 150  ,y: 45 }, 1000);
+  t3.to({ x: -20 ,y: 45 }, 1000);
+  t4.to({ x: 150 ,y: 45 }, 1000);
   t1r.to({ z: Math.PI  }, 1000);
   t2r.to({ z: 0  }, 1000);
 
@@ -300,7 +308,7 @@ function setRealWorldPixels(){
   });  
 }
 function generateTexture() {
-	var size = 20;
+	var size = 16;
 	// create canvas
 	canvas = document.createElement( 'canvas' );
 	canvas.width = size;

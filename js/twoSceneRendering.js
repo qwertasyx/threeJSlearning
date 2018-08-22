@@ -39,7 +39,7 @@ function init() {
   renderer2 = new THREE.WebGLRenderer({ canvas: renderCanvas2 });
   renderer2.setSize( window.innerWidth, 200 );
   
-  // controls
+  // controlss
   controls1 = new THREE.OrbitControls( cameraPersp );
   // controls2 = new THREE.OrbitControls( cameraOrth );
 }

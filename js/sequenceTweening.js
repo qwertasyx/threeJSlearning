@@ -15,7 +15,52 @@ var tweenPos = { startVal:-100,endVal:100,pos:0,func:'Exponential',dir:'In'} // 
 var stats = new Stats();
 stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
-
+///////////////////////
+/// sequence           ///
+///////////////////////
+var sequence = []
+sequence.push(
+  { type:     'Trans',
+    t: 1000,
+    easing:   
+      {
+        func:'Linear',
+        dir:'None'
+      },    
+    position: {x:0,y:0,z:0},
+    scale: {x:1,y:1},
+    rotation: {x:0,y:0,z:0},
+    color: {r:0,g:0,b:1}    
+  }
+)
+sequence.push(
+  { type:     'Trans',
+    t: 1000,
+    easing:   
+      {
+        func:'Step',
+        dir:'In'
+      },    
+    position: {x:100,y:0,z:0},
+    scale: {x:1,y:1},
+    rotation: {x:0,y:2*Math.PI,z:0},
+    color: {r:0,g:1,b:0}    
+  }
+)
+sequence.push(
+  { type:     'Trans',
+    t: 1000,
+    easing:   
+      {
+        func:'Step',
+        dir:'Out'
+      },    
+    position: {x:0,y:100,z:0},
+    scale: {x:2,y:2},
+    rotation: {x:0,y:0,z:2*Math.PI},
+    color: {r:1,g:0,b:0}    
+  }
+)
 ///////////////////////
 /// HardwareSpecific///
 ///////////////////////
@@ -172,6 +217,42 @@ function animate() {
   renderer.render( scene, cameraVisu );
   
   stats.end();
+}
+function buildTweenSequernce(obj,sequence,endless){
+  //init step
+  var baseTween     = new TWEEN.Tween(obj.position);
+  // var rotationTween = new TWEEN.Tween(obj.rotation);
+  // var scalingTween  = new TWEEN.Tween(obj.scale);
+  // var colorTween    = new TWEEN.Tween(obj.material.color);
+  
+  baseTween.to({       } , 0 )
+  // rotationTween.to({ z:0           } , 0 )
+  // scalingTween.to( { x:1 ,y:1      } , 0 )
+  // colorTween.to(   { r:0 ,g:0, b:0 } , 0 )
+
+  // baseTween.chain(colorTween);
+
+  var lastTween = baseTween;
+
+  sequence.forEach(function(seq){
+
+    var positionTween = new TWEEN.Tween(obj.position);
+    var rotationTween = new TWEEN.Tween(obj.rotation);
+    var scalingTween  = new TWEEN.Tween(obj.scale);
+    var colorTween    = new TWEEN.Tween(obj.material.color);
+
+    positionTween.to({ x:seq.position.x ,y:seq.position.y           } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    rotationTween.to({ z:seq.rotation.z                             } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    scalingTween.to( { x:seq.scale.x ,y:seq.scale.y                 } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    colorTween.to(   { r:seq.color.r ,g:seq.color.g, b:seq.color.b  } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    lastTween.chain(positionTween,rotationTween,scalingTween,colorTween)
+    // positiontween is the basetween for the next
+    lastTween = positionTween;    
+  });
+  if(endless){
+    lastTween.chain(baseTween)
+  }
+  return baseTween
 }
 
 /// camerastuff ///

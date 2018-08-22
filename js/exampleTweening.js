@@ -219,9 +219,9 @@ function buildTweenSequernce(obj,sequence,endless){
     var scalingTween  = new TWEEN.Tween(obj.scale);
     var colorTween    = new TWEEN.Tween(obj.material.color);
 
-    positionTween.to({ x:seq.position.x ,y:seq.position.y      } , seq.t )
-    rotationTween.to({ z:seq.rotation.z           } , seq.t )
-    scalingTween.to( { x:seq.scale.x ,y:seq.scale.y      } , seq.t )
+    positionTween.to({ x:seq.position.x ,y:seq.position.y          } , seq.t )
+    rotationTween.to({ z:seq.rotation.z                            } , seq.t )
+    scalingTween.to( { x:seq.scale.x ,y:seq.scale.y                } , seq.t )
     colorTween.to(   { r:seq.color.r ,g:seq.color.g, b:seq.color.b } , seq.t )
     lastTween.chain(positionTween,rotationTween,scalingTween,colorTween)
     // positiontween is the basetween for the next
