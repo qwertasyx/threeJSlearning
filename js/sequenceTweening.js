@@ -18,8 +18,18 @@ document.body.appendChild( stats.dom );
 ///////////////////////
 /// sequence           ///
 ///////////////////////
-var sequence = []
-sequence.push(
+var sequence1 = []
+sequence1.push(
+  { type:     'Init',
+    t: 0,
+    
+    position: {x:0,y:0,z:50},
+    scale: {x:1,y:1},
+    rotation: {x:0,y:0,z:0},
+    color: {r:1,g:1,b:1}    
+  }
+)
+sequence1.push(
   { type:     'Trans',
     t: 1000,
     easing:   
@@ -27,38 +37,65 @@ sequence.push(
         func:'Linear',
         dir:'None'
       },    
-    position: {x:0,y:0,z:0},
-    scale: {x:1,y:1},
-    rotation: {x:0,y:0,z:0},
-    color: {r:0,g:0,b:1}    
-  }
-)
-sequence.push(
-  { type:     'Trans',
-    t: 1000,
-    easing:   
-      {
-        func:'Step',
-        dir:'In'
-      },    
     position: {x:100,y:0,z:0},
     scale: {x:1,y:1},
-    rotation: {x:0,y:2*Math.PI,z:0},
+    rotation: {x:0,y:0,z:0},
     color: {r:0,g:1,b:0}    
   }
 )
-sequence.push(
+sequence1.push(
   { type:     'Trans',
     t: 1000,
     easing:   
       {
-        func:'Step',
-        dir:'Out'
+        func:'Linear',
+        dir:'None'
       },    
     position: {x:0,y:100,z:0},
-    scale: {x:2,y:2},
-    rotation: {x:0,y:0,z:2*Math.PI},
+    scale: {x:0.5,y:5},
+    rotation: {x:0,y:0,z:0},
     color: {r:1,g:0,b:0}    
+  }
+)
+
+
+var sequence2 = []
+sequence2.push(
+  { type:     'Init',
+    t: 0,
+  
+    position: {x:0,y:0,z:0},
+    scale: {x:1,y:1},
+    rotation: {x:0,y:0,z:0},
+    color: {r:1,g:1,b:1}    
+  }
+)
+sequence2.push(
+  { type:     'Trans',
+    t: 1000,
+    easing:   
+      {
+        func:'Linear',
+        dir:'None'
+      },    
+    position: {x:100,y:0,z:50},
+    scale: {x:1,y:1},
+    rotation: {x:0,y:0,z:0},
+    color: {r:1,g:1,b:0}    
+  }
+)
+sequence2.push(
+  { type:     'Trans',
+    t: 750,
+    easing:   
+      {
+        func:'Linear',
+        dir:'None'
+      },    
+    position: {x:0,y:100,z:0},
+    scale: {x:0.5,y:5},
+    rotation: {x:0,y:0,z:0},
+    color: {r:1,g:0,b:1}    
   }
 )
 ///////////////////////
@@ -96,22 +133,21 @@ $( window ).on( "load", function() {
   gui.domElement.id = 'gui';
 
   var f1 = gui.addFolder('Cube pos');    
-    f1.add(cube.position, 'x', -500, 500);
-    f1.add(cube.position, 'y', -500, 500);
-    f1.add(cube.position, 'z', -500, 500);
+    f1.add(cube1.position, 'x', -500, 500);
+    f1.add(cube1.position, 'y', -500, 500);
+    f1.add(cube1.position, 'z', -500, 500);
   f1.open(); 
 
   var f1 = gui.addFolder('Cube rot');
-    f1.add(cube, 'vrz', -0.5, 0.5);
-    f1.add(cube.rotation, 'x', -2, 2);
-    f1.add(cube.rotation, 'y', -2, 2);
-    f1.add(cube.rotation, 'z', -2, 2);
+    f1.add(cube1.rotation, 'x', -2, 2);
+    f1.add(cube1.rotation, 'y', -2, 2);
+    f1.add(cube1.rotation, 'z', -2, 2);
   f1.open(); 
 
   var f1 = gui.addFolder('Cube scale');
-    f1.add(cube.scale, 'x', 1, 20);
-    f1.add(cube.scale, 'y', 1, 20);
-    f1.add(cube.scale, 'z', 1, 20);
+    f1.add(cube1.scale, 'x', 1, 20);
+    f1.add(cube1.scale, 'y', 1, 20);
+    f1.add(cube1.scale, 'z', 1, 20);
   f1.open(); 
 
   var f1 = gui.addFolder('Tween Pos');
@@ -152,7 +188,28 @@ $( window ).on( "load", function() {
     }
   });
 });
-
+var tweens = [null,null]
+$( document ).ready(function() {
+  console.log( "ready!" );
+  $('#start').on('click',function(e){
+    InitPos();
+    // setInitPos(cube1,sequence1)    
+    tweens[0].start()
+    // setInitPos(cube2,sequence2)
+    tweens[1].start()
+  })
+  $('#build').on('click',function(e){
+    
+    tweens[0] = buildTweenSequernce(cube1,sequence1,true)
+    tweens[1] = buildTweenSequernce(cube2,sequence2,true)
+  })
+  $('#stop').on('click',function(e){
+    var tweens = TWEEN.getAll()
+    tweens.forEach(function(t) {
+      t.stop()
+    });    
+  })
+});
 ////////////////////
 ///   functions  ///
 ////////////////////
@@ -163,11 +220,14 @@ function init() {
   scene.background = new THREE.Color( 0x000000 );
   
   //objects
-	var geometry = new THREE.BoxGeometry( 10, 10, 10 );
-	var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-  cube = new THREE.Mesh( geometry, material );
-  cube.vrz = 0;
-  scene.add( cube );
+	var geometry1 = new THREE.BoxGeometry( 10, 10, 10 );
+	var material1 = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+  cube1 = new THREE.Mesh( geometry1, material1 );
+  scene.add( cube1 );
+  var geometry2 = new THREE.BoxGeometry( 10, 10, 10 );
+	var material2 = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+  cube2 = new THREE.Mesh( geometry2, material2 );
+  scene.add( cube2 );
 
 
   // axes
@@ -185,73 +245,94 @@ function init() {
   var canvas = document.getElementById("renderCanvas1")
   cameraVisu = new THREE.PerspectiveCamera( 75, window.innerWidth/500, 0.1, 1000 );
   initCameraPersp();
- 
-  t1 = new TWEEN.Tween(cube.position);
-  // t1 = new TWEEN.Tween(cube2.position);
-  t2 = new TWEEN.Tween(cube.position);
-  t3 = new TWEEN.Tween(cube.position);
-  // t4 = new TWEEN.Tween(cube2.position);
-  // t1r = new TWEEN.Tween(cube2.rotation);
-  // t2r = new TWEEN.Tween(cube2.rotation);
-  t1.to({ x: -100 ,y: 0 }, 0);
-  t2.to({ x: 100 ,y: 0 }, 3000).easing(TWEEN.Easing.Bounce.InOut);
-  t3.to({x:0},1000).easing(TWEEN['Easing']['Bounce']['Out'])
-  // t3.to({ x: -20 ,y: 45 }, 1000);
-  // t4.to({ x: 150 ,y: 45 }, 1000);
-  // t1r.to({ z: Math.PI  }, 1000);
-  // t2r.to({ z: 0  }, 1000);
-
-   t1.chain(t2)
-  // t2.chain(t3)
-  // t3.chain(t4,t2r)
-  // t4.chain(t1)
-  // t1.start();
 } 
 function animate() {
   stats.begin();
   requestAnimationFrame( animate );
   TWEEN.update();
-
-  cube.rotation.z += cube.vrz;
   
   renderer.render( scene, cameraVisu );
   
   stats.end();
 }
-function buildTweenSequernce(obj,sequence,endless){
-  //init step
-  var baseTween     = new TWEEN.Tween(obj.position);
-  // var rotationTween = new TWEEN.Tween(obj.rotation);
-  // var scalingTween  = new TWEEN.Tween(obj.scale);
-  // var colorTween    = new TWEEN.Tween(obj.material.color);
+function setInitPos(obj,sequence){
+  // console.log(obj,sequence);
+  obj.position.x = sequence[0].position.x;
+  obj.position.y = sequence[0].position.y;
+  obj.position.z = sequence[0].position.z;
+
+  obj.scale.x = sequence[0].scale.x;
+  obj.scale.y = sequence[0].scale.y;
   
-  baseTween.to({       } , 0 )
-  // rotationTween.to({ z:0           } , 0 )
-  // scalingTween.to( { x:1 ,y:1      } , 0 )
-  // colorTween.to(   { r:0 ,g:0, b:0 } , 0 )
+  obj.rotation.z = sequence[0].rotation.z;
 
-  // baseTween.chain(colorTween);
+  obj.material.color.r = sequence[0].color.r;
+  obj.material.color.g = sequence[0].color.g;
+  obj.material.color.b = sequence[0].color.b;
+}
+function InitPos(){
+  cube1.position.x = sequence1[0].position.x;
+  cube1.position.y = sequence1[0].position.y;
+  cube1.position.z = sequence1[0].position.z;
 
+  cube1.scale.x = sequence1[0].scale.x;
+  cube1.scale.y = sequence1[0].scale.y;
+
+  cube1.rotation.z = sequence1[0].rotation.z;
+
+  cube1.material.color.r = sequence1[0].color.r;
+  cube1.material.color.g = sequence1[0].color.g;
+  cube1.material.color.b = sequence1[0].color.b;
+  ///
+  cube2.position.x = sequence2[0].position.x;
+  cube2.position.y = sequence2[0].position.y;
+  cube2.position.z = sequence2[0].position.z;
+
+  cube2.scale.x = sequence2[0].scale.x;
+  cube2.scale.y = sequence2[0].scale.y;
+
+  cube2.rotation.z = sequence2[0].rotation.z;
+
+  cube2.material.color.r = sequence2[0].color.r;
+  cube2.material.color.g = sequence2[0].color.g;
+  cube2.material.color.b = sequence2[0].color.b;
+}
+function buildTweenSequernce(obj,sequence,endless){
+  var baseTween = new TWEEN.Tween();
+  baseTween._duration=0;
   var lastTween = baseTween;
-
   sequence.forEach(function(seq){
-
+    if (seq.type=="Init") {
+      return true
+    }
     var positionTween = new TWEEN.Tween(obj.position);
     var rotationTween = new TWEEN.Tween(obj.rotation);
     var scalingTween  = new TWEEN.Tween(obj.scale);
     var colorTween    = new TWEEN.Tween(obj.material.color);
 
-    positionTween.to({ x:seq.position.x ,y:seq.position.y           } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    positionTween.to({ x:seq.position.x ,y:seq.position.y,z:seq.position.z           } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
     rotationTween.to({ z:seq.rotation.z                             } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
     scalingTween.to( { x:seq.scale.x ,y:seq.scale.y                 } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
     colorTween.to(   { r:seq.color.r ,g:seq.color.g, b:seq.color.b  } , seq.t ).easing(TWEEN['Easing'][seq.easing.func][seq.easing.dir]);
+    
     lastTween.chain(positionTween,rotationTween,scalingTween,colorTween)
-    // positiontween is the basetween for the next
-    lastTween = positionTween;    
+    // colorTween is the basetween for the next
+    lastTween = colorTween;    
   });
+  
   if(endless){
-    lastTween.chain(baseTween)
+    if(lastTween._duration!=1000){
+      var delayTween = new TWEEN.Tween();
+      delayTween._duration=250;
+      lastTween.chain(delayTween);
+      lastTween=delayTween;
+    }
+    lastTween.onComplete(function(){
+      setInitPos(obj,sequence);
+    });
+    lastTween.chain(baseTween);
   }
+
   return baseTween
 }
 
