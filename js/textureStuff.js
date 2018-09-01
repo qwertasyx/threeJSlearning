@@ -94,6 +94,11 @@ function init() {
   textures[1] = loader.load( 'img/rndcol.png' );
   textures[2] = loader.load( 'img/cross.png' );
 
+  textures.forEach(function(t){
+    t.minFilter = THREE.NearestFilter
+    t.magFilter = THREE.NearestFilter
+  })  
+
   materials[0] = new THREE.MeshBasicMaterial( { map: textures[0] } );
   materials[1] = new THREE.MeshBasicMaterial( { map: textures[1] } );
   materials[2] = new THREE.MeshBasicMaterial( { map: textures[2] } );
@@ -114,7 +119,7 @@ function init() {
   //objects
 	var geometry = new THREE.BoxGeometry( 8, 8, 8 );
 	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-  cube = new THREE.Mesh( geometry, material );
+  cube = new THREE.Mesh( geometry, materials[2] );
   sceneReal.add( cube );
   // var geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
   // var AOmaterial = new THREE.MeshBasicMaterial( { color: 0x00f00f } );
