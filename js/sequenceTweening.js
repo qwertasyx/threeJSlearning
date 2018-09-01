@@ -22,7 +22,11 @@ var sequence1 = []
 sequence1.push(
   { type:     'Init',
     t: 0,
-    
+    easing:   
+    {
+      func:'Linear',
+      dir:'None'
+    },
     position: {x:0,y:0,z:50},
     scale: {x:1,y:1},
     rotation: {x:0,y:0,z:0},
@@ -63,7 +67,11 @@ var sequence2 = []
 sequence2.push(
   { type:     'Init',
     t: 0,
-  
+    easing:   
+    {
+      func:'Linear',
+      dir:'None'
+    },
     position: {x:0,y:0,z:0},
     scale: {x:1,y:1},
     rotation: {x:0,y:0,z:0},
@@ -75,8 +83,8 @@ sequence2.push(
     t: 1000,
     easing:   
       {
-        func:'Linear',
-        dir:'None'
+        func:'Circular',
+        dir:'InOut'
       },    
     position: {x:100,y:0,z:50},
     scale: {x:1,y:1},
@@ -302,9 +310,9 @@ function buildTweenSequernce(obj,sequence,endless){
   baseTween._duration=0;
   var lastTween = baseTween;
   sequence.forEach(function(seq){
-    if (seq.type=="Init") {
-      return true
-    }
+    // if (seq.type=="Init") {
+    //   return true
+    // }
     var positionTween = new TWEEN.Tween(obj.position);
     var rotationTween = new TWEEN.Tween(obj.rotation);
     var scalingTween  = new TWEEN.Tween(obj.scale);
@@ -328,7 +336,7 @@ function buildTweenSequernce(obj,sequence,endless){
       lastTween=delayTween;
     }
     lastTween.onComplete(function(){
-      setInitPos(obj,sequence);
+      // setInitPos(obj,sequence);
     });
     lastTween.chain(baseTween);
   }
